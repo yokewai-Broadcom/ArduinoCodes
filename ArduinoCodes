@@ -1,0 +1,130 @@
+------------------------
+sht31.ino
+------------------------
+#include <Arduino.h>
+#include <Wire.h>
+#include "Adafruit_SHT31.h"
+
+Adafruit_SHT31 sht31 = Adafruit_SHT31();
+
+//int val = 0;           // variable to store the value read
+//int temp = 0;
+const unsigned int MAX_MESSAGE_LENGTH = 100;
+
+void setup() {
+  Serial.begin(9600);
+
+  if (! sht31.begin(0x44)) {   // Set to 0x45 for alternate I2C address
+    Serial.println("Couldn't find SHT31");
+    while (1) delay(1);
+  }
+}
+
+//void loop() {
+//  float t = sht31.readTemperature();
+//  float h = sht31.readHumidity();
+//
+//  if (! isnan(t)) {  // check if 'is not a number'
+//    Serial.print("Temp *C = "); Serial.print(t); Serial.print("\t\t");
+//  } else { 
+//    Serial.println("Failed to read temperature");
+//  }
+//  
+//  if (! isnan(h)) {  // check if 'is not a number'
+//    Serial.print("Hum. % = "); Serial.println(h);
+//  } else { 
+//    Serial.println("Failed to read humidity");
+//  }
+//
+//  delay(1000);
+//}
+
+
+void loop() 
+{
+ //Check to see if anything is available in the serial receive buffer
+ while (Serial.available() > 0)
+  {
+   //Create a place to hold the incoming message
+   static char message[MAX_MESSAGE_LENGTH];
+   static unsigned int message_pos = 0; 
+
+   //Read the next available byte in the serial receive buffer
+   char inByte = Serial.read();
+
+   //Serial.println(inByte);
+   //Serial.println("readme");
+
+      //Message coming in (check not terminating character) and guard for over message size
+    if( inByte != '\n' && (message_pos < MAX_MESSAGE_LENGTH - 1) )
+       {
+         //Add the incoming byte to our message
+         message[message_pos] = inByte;
+         message_pos++;
+       }
+       //Full message received...
+    else
+      {
+         //Add null character to string
+          message[message_pos] = '\0';
+    
+         //Print the message (or do other things)
+         //Serial.println("matched");
+            
+        if(message[0] == 'r')
+          {
+          //Serial.print(Module.readCelsius()-4.69);
+          
+          //Serial.print(Module.readCelsius());
+          float t = sht31.readTemperature();
+          float h = sht31.readHumidity();
+          
+          Serial.print(t);
+          Serial.print("degC,");
+          Serial.print(h);
+          Serial.println("%RH");
+                    
+          ///**0.87*/)
+          //Serial.println("degC");
+
+          //Serial.print(sht31.readHumidity());
+                    
+          ///**0.87*/)
+          //Serial.println("%RH");
+
+
+          //val = analogRead(5);
+          //float mv = ( val/1023.0)*5000;
+          //float cel = mv/10;
+          //Serial.print("TEMPRATURE = ");
+          //Serial.println(cel);
+          delay(100);
+              
+          //val = analogRead(analogPinT);    // read the humidity
+          //temp = (val * 74.06*1.23 /1023);
+          //temp = (val);
+    
+          //Serial.print(temp);             // debug value
+          //Serial.println("%RH");             // debug  alue
+    
+          //val = analogRead(analogPinH);    // read the input pin
+          //temp = ((val*5/1023)-1) * 25;
+          //temp = (val*5/1023);
+    
+          //Serial.print(temp);             // debug value
+          //Serial.print("%RH,");             // debug  alue
+    
+          //val = analogRead(analogPinE);    // read the input pin
+          //temp = ((val*5/1023)-1) * 0.25;
+          //temp = (val*5/1023);
+    
+          //Serial.print(temp);             // debug value
+          //Serial.println("MPa");             // debug  alue
+        
+          //delay(5000);
+          //Reset for the next message
+          }
+          message_pos = 0; 
+       }
+  }
+}
